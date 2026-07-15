@@ -17,8 +17,8 @@
   --text:#c9d1d9;
   --text2:#8b949e;
   --text3:#4a5568;
-  --accent:#3b82f6;
-  --accent-dim:rgba(59,130,246,0.12);
+  --accent:#8b5cf6;
+  --accent-dim:rgba(139,92,246,0.12);
   --green:#22c55e;
   --green-dim:rgba(34,197,94,0.1);
   --red:#ef4444;
@@ -98,6 +98,18 @@ body{
   transition:all .15s;
 }
 .btn-reset:hover{border-color:var(--red);color:var(--red)}
+.btn-export{
+  padding:4px 12px;
+  background:transparent;
+  border:1px solid var(--border2);
+  border-radius:4px;
+  font-family:var(--mono);
+  font-size:11px;
+  color:var(--text2);
+  cursor:pointer;
+  transition:all .15s;
+}
+.btn-export:hover{border-color:var(--accent);color:var(--accent)}
 
 /* ── LAYOUT ── */
 .app-body{
@@ -306,7 +318,7 @@ body{
   white-space:nowrap;
 }
 .btn-primary{background:var(--accent);color:#fff;border-color:var(--accent)}
-.btn-primary:hover{background:#2563eb}
+.btn-primary:hover{background:#7c3aed}
 .btn-danger{background:var(--red-dim);color:var(--red);border-color:var(--red)}
 .btn-danger:hover{background:var(--red);color:#fff}
 .btn-success{background:var(--green-dim);color:var(--green);border-color:var(--green)}
@@ -371,13 +383,13 @@ body{
 
 /* ── PENDING BANNER ── */
 .pending{
-  background:rgba(59,130,246,.08);
-  border:1px solid rgba(59,130,246,.3);
+  background:rgba(139,92,246,.08);
+  border:1px solid rgba(139,92,246,.3);
   border-radius:5px;padding:10px 14px;
   display:none;margin-bottom:12px;
 }
 .pending.on{display:block;animation:pulse 2s ease infinite}
-@keyframes pulse{0%,100%{border-color:rgba(59,130,246,.3)}50%{border-color:rgba(59,130,246,.7)}}
+@keyframes pulse{0%,100%{border-color:rgba(139,92,246,.3)}50%{border-color:rgba(139,92,246,.7)}}
 .pending-lbl{font-family:var(--mono);font-size:9px;letter-spacing:1px;color:var(--accent);margin-bottom:4px;text-transform:uppercase}
 .pending-txt{font-size:13px;color:var(--text);font-weight:500}
 
@@ -524,6 +536,7 @@ body{
   cursor:pointer;transition:all .12s;
 }
 .roster-remove:hover{border-color:var(--red);color:var(--red)}
+.section-label{
   font-family:var(--mono);font-size:10px;letter-spacing:1px;text-transform:uppercase;
   color:var(--text3);margin-bottom:8px;
 }
@@ -541,6 +554,7 @@ body{
     <div class="tstat g"><span>approved</span><span class="val" id="ts-valid">0</span></div>
     <div class="tstat r"><span>rejected</span><span class="val" id="ts-blocked">0</span></div>
     <div class="tstat g"><span>aid out</span><span class="val" id="ts-aid">$0</span></div>
+    <button class="btn-export" onclick="exportLedger()">export json</button>
     <button class="btn-reset" onclick="resetAll()">reset all</button>
   </div>
 </div>
@@ -576,7 +590,7 @@ body{
     </button>
 
     <div class="sidebar-bottom">
-      <div class="sidebar-hint">2/3 node majority<br>required for consensus</div>
+      <div class="sidebar-hint" id="sidebar-consensus-hint">3/4 node majority<br>required for consensus</div>
     </div>
   </div>
 
@@ -612,13 +626,13 @@ body{
         <div class="info-row"><div class="info-num">1</div><div class="info-text">Go to <strong>Roles</strong> and assign each student or group their role before anything else.</div></div>
         <div class="info-row"><div class="info-num">2</div><div class="info-text"><strong>Round 1 — Centralized.</strong> Submit some transactions. Let the Bad Actor tamper. Watch the Auditor struggle.</div></div>
         <div class="info-row"><div class="info-num">3</div><div class="info-text"><strong>Round 2 — Blockchain.</strong> Now every transaction needs node consensus. Try the same tamper — the chain hash mismatch is detected automatically.</div></div>
-        <div class="info-row"><div class="info-num">4</div><div class="info-text"><strong>Round 3 — Smart Contract.</strong> Automated rules block unverified IDs and suspicious purposes before reaching the nodes at all.</div></div>
+        <div class="info-row"><div class="info-num">4</div><div class="info-text"><strong>Round 3 — Smart Contract.</strong> Automated rules block unverified IDs, suspicious purposes, and oversized transfers before reaching the nodes at all.</div></div>
         <div class="info-row"><div class="info-num">5</div><div class="info-text">End on <strong>Debrief</strong> — six questions to close the session.</div></div>
 
         <div class="split-3">
           <div class="round-card"><h4>Round 1 — Centralized</h4><p>Single coordinator. No checks. Bad Actor can alter records silently. Auditor is almost always too late.</p></div>
-          <div class="round-card"><h4>Round 2 — Blockchain</h4><p>Every transaction broadcasts to all nodes. 2 of 3 must approve. Tampering breaks the chain hash.</p></div>
-          <div class="round-card"><h4>Round 3 — Smart Contract</h4><p>Automated rules enforce verified IDs and legitimate purposes before a transaction even reaches the nodes.</p></div>
+          <div class="round-card"><h4>Round 2 — Blockchain</h4><p>Every transaction broadcasts to all nodes. 3 of 4 must approve. Tampering breaks the chain hash.</p></div>
+          <div class="round-card"><h4>Round 3 — Smart Contract</h4><p>Automated rules enforce verified IDs, legitimate purposes, and a $1,000 transaction cap before a transaction even reaches the nodes.</p></div>
         </div>
       </div>
     </div>
@@ -654,8 +668,10 @@ body{
                     <option value="Node Alpha">Node Alpha</option>
                     <option value="Node Beta">Node Beta</option>
                     <option value="Node Gamma">Node Gamma</option>
+                    <option value="Node Delta">Node Delta</option>
                     <option value="Beneficiary REF-001">Beneficiary — REF-001 (Verified)</option>
                     <option value="Beneficiary REF-002">Beneficiary — REF-002 (Verified)</option>
+                    <option value="Beneficiary REF-003">Beneficiary — REF-003 (Verified)</option>
                     <option value="Beneficiary REF-999">Beneficiary — REF-999 (Unverified)</option>
                     <option value="Bad Actor">Bad Actor</option>
                     <option value="Auditor">Auditor</option>
@@ -670,7 +686,7 @@ body{
               <div class="pane-body" style="display:flex;flex-direction:column;gap:8px;padding:12px 14px">
                 <div class="role-ref-row"><span class="role-ref-name">Donor</span><span class="role-ref-desc">Sends funds, tracks delivery</span></div>
                 <div class="role-ref-row"><span class="role-ref-name">NGO Coordinator</span><span class="role-ref-desc">Processes & submits transactions</span></div>
-                <div class="role-ref-row"><span class="role-ref-name">Node Alpha/Beta/Gamma</span><span class="role-ref-desc">Vote to approve or reject — 2/3 needed</span></div>
+                <div class="role-ref-row"><span class="role-ref-name">Node Alpha/Beta/Gamma/Delta</span><span class="role-ref-desc">Vote to approve or reject — 3/4 needed</span></div>
                 <div class="role-ref-row"><span class="role-ref-name">Beneficiary</span><span class="role-ref-desc">Holds a verified or fake ID</span></div>
                 <div class="role-ref-row"><span class="role-ref-name">Bad Actor</span><span class="role-ref-desc">Attempts fraud and tampering</span></div>
                 <div class="role-ref-row"><span class="role-ref-name">Auditor</span><span class="role-ref-desc">Reviews ledger for inconsistencies</span></div>
@@ -709,15 +725,15 @@ body{
           <div class="pane">
             <div class="pane-header"><span class="pane-title">Submit Transaction</span></div>
             <div class="pane-body">
-              <div class="field"><label>Role</label><select id="r1-role"><option>Donor</option><option>NGO Coordinator</option><option>Bad Actor</option></select></div>
-              <div class="field"><label>Beneficiary ID</label><select id="r1-ben"><option>REF-001 (Verified)</option><option>REF-002 (Verified)</option><option>REF-999 (Unverified)</option><option>REF-000 (Fake)</option></select></div>
+              <div class="field"><label>Role</label><select id="r1-role" onchange="toggleTamper('r1')"><option>Donor</option><option>NGO Coordinator</option><option>Bad Actor</option></select></div>
+              <div class="field"><label>Beneficiary ID</label><select id="r1-ben"><option>REF-001 (Verified)</option><option>REF-002 (Verified)</option><option>REF-003 (Verified)</option><option>REF-999 (Unverified)</option><option>REF-000 (Fake)</option></select></div>
               <div class="field"><label>Amount (USD)</label><input type="number" id="r1-amount" value="500" min="1"></div>
-              <div class="field"><label>Purpose</label><select id="r1-purpose"><option>Food Aid</option><option>Medical Supplies</option><option>Shelter</option><option>Education</option><option>Personal Transfer</option></select></div>
+              <div class="field"><label>Purpose</label><select id="r1-purpose"><option>Food Aid</option><option>Medical Supplies</option><option>Shelter</option><option>Education</option><option>Water & Sanitation</option><option>Personal Transfer</option></select></div>
             </div>
             <div class="pane-foot">
               <div class="btn-row">
                 <button class="btn btn-primary" style="flex:1" onclick="r1Submit()">Submit</button>
-                <button class="btn btn-danger" onclick="r1Tamper()">Tamper</button>
+                <button class="btn btn-danger" id="r1-tamper-btn" onclick="r1Tamper()">Tamper</button>
               </div>
             </div>
           </div>
@@ -749,7 +765,7 @@ body{
       <div class="page-header">
         <div>
           <div class="page-title">Round 2 — Blockchain Consensus</div>
-          <div class="page-sub">2 of 3 nodes must approve. Tampering breaks the chain hash.</div>
+          <div class="page-sub">3 of 4 nodes must approve. Tampering breaks the chain hash.</div>
         </div>
         <div class="page-actions">
           <button class="btn btn-ghost" onclick="goPage('r1')">Round 1</button>
@@ -762,15 +778,15 @@ body{
           <div class="pane">
             <div class="pane-header"><span class="pane-title">Submit Transaction</span></div>
             <div class="pane-body">
-              <div class="field"><label>Role</label><select id="r2-role"><option>Donor</option><option>NGO Coordinator</option><option>Bad Actor</option></select></div>
-              <div class="field"><label>Beneficiary ID</label><select id="r2-ben"><option>REF-001 (Verified)</option><option>REF-002 (Verified)</option><option>REF-999 (Unverified)</option><option>REF-000 (Fake)</option></select></div>
+              <div class="field"><label>Role</label><select id="r2-role" onchange="toggleTamper('r2')"><option>Donor</option><option>NGO Coordinator</option><option>Bad Actor</option></select></div>
+              <div class="field"><label>Beneficiary ID</label><select id="r2-ben"><option>REF-001 (Verified)</option><option>REF-002 (Verified)</option><option>REF-003 (Verified)</option><option>REF-999 (Unverified)</option><option>REF-000 (Fake)</option></select></div>
               <div class="field"><label>Amount (USD)</label><input type="number" id="r2-amount" value="500" min="1"></div>
-              <div class="field"><label>Purpose</label><select id="r2-purpose"><option>Food Aid</option><option>Medical Supplies</option><option>Shelter</option><option>Education</option><option>Personal Transfer</option></select></div>
+              <div class="field"><label>Purpose</label><select id="r2-purpose"><option>Food Aid</option><option>Medical Supplies</option><option>Shelter</option><option>Education</option><option>Water & Sanitation</option><option>Personal Transfer</option></select></div>
             </div>
             <div class="pane-foot">
               <div class="btn-row">
                 <button class="btn btn-primary" style="flex:1" onclick="r2Submit()">Broadcast</button>
-                <button class="btn btn-danger" onclick="r2Tamper()">Tamper</button>
+                <button class="btn btn-danger" id="r2-tamper-btn" onclick="r2Tamper()">Tamper</button>
               </div>
             </div>
           </div>
@@ -831,7 +847,8 @@ body{
                 <div class="cc">// Aid release conditions</div>
                 <div><span class="ck">IF</span>   beneficiary == <span class="cv">VERIFIED</span></div>
                 <div><span class="ck">AND</span>  purpose != <span class="cv">"Personal Transfer"</span></div>
-                <div><span class="ck">AND</span>  nodes >= <span class="cv">2/3</span> approve</div>
+                <div><span class="ck">AND</span>  amount &lt;= <span class="cv">$1,000</span></div>
+                <div><span class="ck">AND</span>  nodes >= <span class="cv">3/4</span> approve</div>
                 <div><span class="ck">THEN</span> <span class="co">release_aid()</span></div>
                 <div><span class="ck">ELSE</span> <span class="ce">reject(reason)</span></div>
               </div>
@@ -842,9 +859,9 @@ body{
             <div class="pane-header"><span class="pane-title">Submit Transaction</span></div>
             <div class="pane-body">
               <div class="field"><label>Role</label><select id="r3-role"><option>Donor</option><option>NGO Coordinator</option><option>Bad Actor</option></select></div>
-              <div class="field"><label>Beneficiary ID</label><select id="r3-ben"><option>REF-001 (Verified)</option><option>REF-002 (Verified)</option><option>REF-999 (Unverified)</option><option>REF-000 (Fake)</option></select></div>
+              <div class="field"><label>Beneficiary ID</label><select id="r3-ben"><option>REF-001 (Verified)</option><option>REF-002 (Verified)</option><option>REF-003 (Verified)</option><option>REF-999 (Unverified)</option><option>REF-000 (Fake)</option></select></div>
               <div class="field"><label>Amount (USD)</label><input type="number" id="r3-amount" value="500" min="1"></div>
-              <div class="field"><label>Purpose</label><select id="r3-purpose"><option>Food Aid</option><option>Medical Supplies</option><option>Shelter</option><option>Education</option><option>Personal Transfer</option></select></div>
+              <div class="field"><label>Purpose</label><select id="r3-purpose"><option>Food Aid</option><option>Medical Supplies</option><option>Shelter</option><option>Education</option><option>Water & Sanitation</option><option>Personal Transfer</option></select></div>
             </div>
             <div class="pane-foot">
               <button class="btn btn-primary btn-full" onclick="r3Submit()">Run contract</button>
@@ -911,10 +928,10 @@ body{
 
         <div class="section-label">Round 2 — Blockchain</div>
         <div class="q-item"><div class="q-head"><span class="q-round">R2</span> Q3</div><div class="q-body">Why couldn't the Bad Actor tamper successfully in Round 2? What specifically broke — and how did the system detect it without any human auditor being involved?</div></div>
-        <div class="q-item"><div class="q-head"><span class="q-round">R2</span> Q4</div><div class="q-body">We used 3 nodes and required 2 to agree. What happens if one node is dishonest? What if two nodes collude? At what point does the consensus model actually fail?</div></div>
+        <div class="q-item"><div class="q-head"><span class="q-round">R2</span> Q4</div><div class="q-body">We used 4 nodes and required 3 to agree. What happens if one node is dishonest? What if two nodes collude? At what point does the consensus model actually fail?</div></div>
 
         <div class="section-label">Round 3 — Smart Contract</div>
-        <div class="q-item"><div class="q-head"><span class="q-round">R3</span> Q5</div><div class="q-body">The smart contract auto-rejected transactions with unverified IDs. But who wrote those rules? Who can update them — and what happens if the rules themselves are biased against certain populations?</div></div>
+        <div class="q-item"><div class="q-head"><span class="q-round">R3</span> Q5</div><div class="q-body">The smart contract auto-rejected transactions with unverified IDs and amounts over the $1,000 cap. But who wrote those rules? Who can update them — and what happens if the rules themselves are biased against certain populations?</div></div>
         <div class="q-item"><div class="q-head"><span class="q-round">R3</span> Q6</div><div class="q-body">Think about BanQu's refugee identity model. How would you adapt this three-round simulation for East Africa? Which round best represents what BanQu actually does — and what is still missing from our model?</div></div>
 
       </div>
@@ -924,7 +941,10 @@ body{
 </div><!-- /app-body -->
 
 <script>
-const NODES=[{id:'A',name:'Node Alpha',sub:'Peer 1/3'},{id:'B',name:'Node Beta',sub:'Peer 2/3'},{id:'G',name:'Node Gamma',sub:'Peer 3/3'}];
+const NODES=[{id:'A',name:'Node Alpha',sub:'Peer 1/4'},{id:'B',name:'Node Beta',sub:'Peer 2/4'},{id:'G',name:'Node Gamma',sub:'Peer 3/4'},{id:'D',name:'Node Delta',sub:'Peer 4/4'}];
+const CONSENSUS_THRESHOLD=3; // votes required to approve (3 of 4)
+const MIN_VOTES_TO_FINALIZE=3; // minimum votes cast before finalize is allowed
+const TX_CAP=1000; // smart contract transaction cap (USD)
 const PAGES=['overview','roles','r1','r2','r3','debrief'];
 const ROUND_NAMES={overview:'—',roles:'—',r1:'Round 1 — Centralized',r2:'Round 2 — Blockchain',r3:'Round 3 — Smart Contract',debrief:'Debrief'};
 
@@ -1040,6 +1060,13 @@ function getTx(p){
   };
 }
 
+// Tamper button visibility — only shown when role is Bad Actor
+function toggleTamper(round){
+  const role=document.getElementById(round+'-role').value;
+  const btn=document.getElementById(round+'-tamper-btn');
+  if(btn)btn.style.display=(role==='Bad Actor')?'inline-block':'none';
+}
+
 // R1
 function r1Submit(){const tx=getTx('r1');addBlock('r1',tx,'valid');log('r1-log',`${tx.role} → $${tx.amount} to ${tx.ben}  [${tx.purpose}]`,'ok');}
 function r1Tamper(){const tx=getTx('r1');tx.role='Bad Actor';addBlock('r1',tx,'tampered');log('r1-log','Bad Actor tampered record — accepted without rejection','err');}
@@ -1059,10 +1086,11 @@ function r2Tamper(){
 function r2Finalize(){
   if(!state.r2.pending){log('r2-log','No pending transaction','err');return;}
   const vs=Object.values(state.r2.votes);
-  if(vs.length<2){log('r2-log','Need at least 2 votes first','err');return;}
+  if(vs.length<MIN_VOTES_TO_FINALIZE){log('r2-log',`Need at least ${MIN_VOTES_TO_FINALIZE} votes first`,'err');return;}
   const ok=vs.filter(v=>v==='approve').length;
-  addBlock('r2',state.r2.pending,ok>=2?'valid':'invalid');
-  log('r2-log',ok>=2?`Consensus: ${ok}/3 approve — block added`:`Consensus failed: ${ok}/3 — rejected`,ok>=2?'ok':'err');
+  const passed=ok>=CONSENSUS_THRESHOLD;
+  addBlock('r2',state.r2.pending,passed?'valid':'invalid');
+  log('r2-log',passed?`Consensus: ${ok}/4 approve — block added`:`Consensus failed: ${ok}/4 — rejected`,passed?'ok':'err');
   state.r2.pending=null;state.r2.votes={};
   document.getElementById('r2-pending').classList.remove('on');
   renderNodes('r2-nodes',{},'r2');
@@ -1073,9 +1101,11 @@ function r3Submit(){
   const tx=getTx('r3');
   const ver=tx.ben.includes('Verified');
   const sus=tx.purpose==='Personal Transfer';
-  if(!ver||sus){
+  const overCap=tx.amount>TX_CAP;
+  if(!ver||sus||overCap){
     addBlock('r3',tx,'invalid');
-    log('r3-log',`Contract rejected: ${!ver?'ID not verified':'suspicious purpose'}. Nodes never reached.`,'err');
+    const reason=!ver?'ID not verified':sus?'suspicious purpose':`amount exceeds $${TX_CAP.toLocaleString()} cap`;
+    log('r3-log',`Contract rejected: ${reason}. Nodes never reached.`,'err');
     return;
   }
   state.r3.pending=tx;state.r3.votes={};
@@ -1087,10 +1117,11 @@ function r3Submit(){
 function r3Finalize(){
   if(!state.r3.pending){log('r3-log','No pending transaction','err');return;}
   const vs=Object.values(state.r3.votes);
-  if(vs.length<2){log('r3-log','Need at least 2 votes','err');return;}
+  if(vs.length<MIN_VOTES_TO_FINALIZE){log('r3-log',`Need at least ${MIN_VOTES_TO_FINALIZE} votes`,'err');return;}
   const ok=vs.filter(v=>v==='approve').length;
-  addBlock('r3',state.r3.pending,ok>=2?'valid':'invalid');
-  log('r3-log',ok>=2?`${ok}/3 approve — aid released`:`${ok}/3 — rejected`,ok>=2?'ok':'err');
+  const passed=ok>=CONSENSUS_THRESHOLD;
+  addBlock('r3',state.r3.pending,passed?'valid':'invalid');
+  log('r3-log',passed?`${ok}/4 approve — aid released`:`${ok}/4 — rejected`,passed?'ok':'err');
   state.r3.pending=null;state.r3.votes={};
   document.getElementById('r3-pending').classList.remove('on');
   renderNodes('r3-nodes',{},'r3');
@@ -1145,6 +1176,29 @@ function renderRoster() {
   `).join('');
 }
 
+// Export ledger as JSON
+function exportLedger(){
+  const payload={
+    exportedAt:new Date().toISOString(),
+    stats:state.stats,
+    rounds:{
+      round1_centralized:state.r1.blocks,
+      round2_blockchain:state.r2.blocks,
+      round3_smart_contract:state.r3.blocks,
+    },
+    roster:roster,
+  };
+  const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download='chainsim-ledger-'+Date.now()+'.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
 // Reset
 function resetAll(){
   state.stats={total:0,valid:0,blocked:0,tampered:0,aid:0};
@@ -1158,12 +1212,16 @@ function resetAll(){
     if(pb)pb.classList.remove('on');
     renderNodes(r+'-nodes',{},r);
   });
+  toggleTamper('r1');
+  toggleTamper('r2');
   updateTopbar();
 }
 
 // Init
 renderNodes('r2-nodes',{},'r2');
 renderNodes('r3-nodes',{},'r3');
+toggleTamper('r1');
+toggleTamper('r2');
 updateTopbar();
 </script>
 </body>
